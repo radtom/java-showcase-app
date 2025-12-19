@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1.0.0-create-table-items" author="radtom">
+        <createTable tableName="items">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="value" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="datetime"/>
+        </createTable>
+
+        <addPrimaryKey tableName="items" columnNames="id"/>
+
+        <createIndex tableName="items" indexName="idx-items-value">
+            <column name="value"/>
+        </createIndex>
+
+        <createIndex tableName="items" indexName="idx-items-updated">
+            <column name="updated"/>
+        </createIndex>
+
+    </changeSet>
+
+
+    <changeSet id="1.0.0-create-table-tags" author="radtom">
+        <createTable tableName="tags">
+            <column name="value" type="text"/>
+        </createTable>
+
+        <addPrimaryKey tableName="tags" columnNames="value"/>
+    </changeSet>
+
+    <changeSet id="1.0.0-create-table-items_tags" author="radtom">
+        <createTable tableName="items_tags">
+            <column name="item_id" type="bigint">
+                <constraints foreignKeyName="fk_items_id" referencedTableName="items" referencedColumnNames="id"/>
+            </column>
+            <column name="tag_value" type="text">
+                <constraints foreignKeyName="fk_tags_id" referencedTableName="tags" referencedColumnNames="value"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="items_tags" columnNames="item_id, tag_value"/>
+
+        <!-- Postgres automatically creates index for primary key - for direction item -> tag -->
+
+        <createIndex tableName="items_tags" indexName="idx-items_tags-backwards">
+            <column name="tag_value"/>
+            <column name="item_id"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

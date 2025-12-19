@@ -1,0 +1,64 @@
+x-liquibase-base: &liquibase-base
+  image: liquibase/liquibase:4.33.0
+  volumes:
+    - ../db/changelog:/liquibase/changelog
+
+services:
+  postgres-db:
+    image: postgres:17
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: dummy
+      POSTGRES_PASSWORD: dummy
+      POSTGRES_DB: items
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/opt/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dummy -d items"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  liquibase-model:
+    <<: *liquibase-base
+    command: >
+      --changelog-file=changelog/model.xml
+      --url=jdbc:postgresql://postgres-db:5432/items
+      --username=dummy
+      --password=dummy
+      update
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+
+  liquibase-data:
+    <<: *liquibase-base
+    command: >
+      --changelog-file=changelog/data.xml
+      --url=jdbc:postgresql://postgres-db:5432/items
+      --database-changelog-table-name=databasechangelog
+      --database-changelog-lock-table-name=databasechangeloglock
+      --username=dummy
+      --password=dummy
+      update
+    depends_on:
+      liquibase-model:
+        condition: service_completed_successfully
+
+  java-showcase-app:
+    image: java-showcase-app:latest
+    container_name: java-showcase-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/items
+      - SPRING_DATASOURCE_USERNAME=dummy
+      - SPRING_DATASOURCE_PASSWORD=dummy
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      liquibase-data:
+        condition: service_completed_successfully
+volumes:
+  postgres-data:

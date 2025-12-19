@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1.0.0-data-tags" author="radtom">
+        <insert tableName="tags"><column name="value" value="electronics"/></insert>
+        <insert tableName="tags"><column name="value" value="sale"/></insert>
+        <insert tableName="tags"><column name="value" value="new-arrival"/></insert>
+        <insert tableName="tags"><column name="value" value="refurbished"/></insert>
+    </changeSet>
+
+    <changeSet id="1.0.0-data-items" author="radtom">
+        <insert tableName="items">
+            <column name="value" valueNumeric="150"/>
+            <column name="created" valueComputed="now()"/>
+        </insert>
+        <insert tableName="items">
+            <column name="value" valueNumeric="300"/>
+            <column name="created" valueComputed="now()"/>
+        </insert>
+        <insert tableName="items">
+            <column name="value" valueNumeric="450"/>
+            <column name="created" valueComputed="now()"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="1.0.0-data-items-tags" author="radtom">
+        <insert tableName="items_tags">
+            <column name="item_id" valueNumeric="1"/>
+            <column name="tag_value" value="electronics"/>
+        </insert>
+        <insert tableName="items_tags">
+            <column name="item_id" valueNumeric="1"/>
+            <column name="tag_value" value="new-arrival"/>
+        </insert>
+
+        <insert tableName="items_tags">
+            <column name="item_id" valueNumeric="2"/>
+            <column name="tag_value" value="sale"/>
+        </insert>
+
+        <insert tableName="items_tags">
+            <column name="item_id" valueNumeric="3"/>
+            <column name="tag_value" value="electronics"/>
+        </insert>
+        <insert tableName="items_tags">
+            <column name="item_id" valueNumeric="3"/>
+            <column name="tag_value" value="refurbished"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
