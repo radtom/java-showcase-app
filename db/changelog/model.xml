@@ -14,6 +14,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="updated" type="datetime"/>
+            <column name="version" type="bigint"/>
         </createTable>
 
         <addPrimaryKey tableName="items" columnNames="id"/>
@@ -32,6 +33,7 @@
     <changeSet id="1.0.0-create-table-tags" author="radtom">
         <createTable tableName="tags">
             <column name="value" type="text"/>
+            <column name="version" type="bigint"/>
         </createTable>
 
         <addPrimaryKey tableName="tags" columnNames="value"/>
