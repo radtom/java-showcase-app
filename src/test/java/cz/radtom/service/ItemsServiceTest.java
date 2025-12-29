@@ -5,7 +5,11 @@ import module java.base;
 import cz.radtom.dto.ItemDto;
 import cz.radtom.dto.SearchOperation;
 import cz.radtom.entity.Item;
+import cz.radtom.entity.Tag;
+import cz.radtom.exception.ItemNotFoundException;
 import cz.radtom.repository.ItemsRepository;
+import cz.radtom.repository.TagsRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,12 +31,16 @@ public class ItemsServiceTest {
     @Mock
     private ItemsRepository itemsRepository;
 
+    @Mock
+    private TagsRepository tagsRepository;
+
     @InjectMocks
     private ItemsService itemsService;
 
     @Test
+    @DisplayName("Should return items")
     void getAllItems_ShouldReturnListofItems() {
-        // 1. Arrange: Setup mock data and behavior
+        // 1. Arrange
         Item item1 = new Item();
         Item item2 = new Item();
         List<Item> mockItems = Arrays.asList(item1, item2);
@@ -41,18 +49,18 @@ public class ItemsServiceTest {
 
         when(itemsRepository.findAll(pageable)).thenReturn(mockPage);
 
-        // 2. Act: Call the service method
+        // 2. Act
         Page<ItemDto> result = itemsService.getAllItems(pageable);
 
-        // 3. Assert: Verify the results
+        // 3. Assert
         assertNotNull(result, "The returned list should not be null");
         assertEquals(2, result.getTotalElements(), "The list size should match the mock data");
 
-        // Verify that the repository method was actually called
         verify(itemsRepository).findAll(pageable);
     }
 
     @Test
+    @DisplayName("Should return item by ID")
     void getItemById_WhenFound_ShouldReturnDto() {
         // Arrange
         Long id = 1L;
@@ -69,23 +77,25 @@ public class ItemsServiceTest {
     }
 
     @Test
-    void getItemById_WhenNotFound_ShouldReturnNull() {
+    @DisplayName("Should throw exception when item not found")
+    void getItemById_WhenNotFound_ShouldThrow() {
         // Arrange
         when(itemsRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Act
-        ItemDto result = itemsService.getItemById(99L);
-
-        // Assert
-        assertNull(result);
+        // Act and assert
+        assertThrows(ItemNotFoundException.class, () -> itemsService.getItemById(99L));
     }
 
     @Test
+    @DisplayName("Should create item")
     void createItem_ShouldReturnSavedItem() {
         // Arrange
         ItemDto dto = new ItemDto(null, 123, null, null,  Set.of("test"));
         Item item = Item.fromDto(dto);
+        Tag tag = new Tag();
+        tag.setValue("test");
         when(itemsRepository.save(any(Item.class))).thenReturn(item);
+        when(tagsRepository.save(any(Tag.class))).thenReturn(tag);
 
         // Act
         Item result = itemsService.createItem(123, Set.of("test"));
@@ -96,6 +106,7 @@ public class ItemsServiceTest {
     }
 
     @Test
+    @DisplayName("Should update item")
     void updateItem_ShouldReturnSavedItem() {
         // Arrange
         ItemDto dto = new ItemDto(1L, 123, null, null, null);
@@ -112,6 +123,7 @@ public class ItemsServiceTest {
     }
 
     @Test
+    @DisplayName("Should search paginated items")
     void searchItems_ReturnsPageOfDtos() {
         // Arrange
         Integer value = 100;
@@ -138,6 +150,7 @@ public class ItemsServiceTest {
     }
 
     @Test
+    @DisplayName("Should search empty page")
     void searchItems_ReturnsEmptyPage() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);

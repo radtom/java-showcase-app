@@ -28,16 +28,19 @@
         <insert tableName="items">
             <column name="value" valueNumeric="150"/>
             <column name="created" valueComputed="now()"/>
+            <column name="updated" valueComputed="now()"/>
             <column name="version" valueNumeric="1"/>
         </insert>
         <insert tableName="items">
             <column name="value" valueNumeric="300"/>
             <column name="created" valueComputed="now()"/>
+            <column name="updated" valueComputed="now()"/>
             <column name="version" valueNumeric="1"/>
         </insert>
         <insert tableName="items">
             <column name="value" valueNumeric="450"/>
             <column name="created" valueComputed="now()"/>
+            <column name="updated" valueComputed="now()"/>
             <column name="version" valueNumeric="1"/>
         </insert>
     </changeSet>

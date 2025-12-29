@@ -13,7 +13,7 @@ import lombok.Setter;
 public class Tag {
 
     @Id
-    @Column(name = "value")
+    @Column(name = "`value`")
     private String value;
 
     @Version
@@ -28,14 +28,4 @@ public class Tag {
         tag.setValue(value);
         return tag;
     }
-
-    public static Set<Tag> fromStringSet(Set<String> tags) {
-        if (tags == null) {
-            return Set.of();
-        }
-        else {
-            return tags.stream().map(Tag::of).collect(Collectors.toSet());
-        }
-    }
-
 }

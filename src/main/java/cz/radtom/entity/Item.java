@@ -21,7 +21,7 @@ public class Item {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "value")
+    @Column(name = "`value`")
     private Integer value;
 
     @Column(name = "created")
@@ -30,7 +30,7 @@ public class Item {
     @Column(name = "updated")
     private ZonedDateTime updated;
 
-    @ManyToMany(cascade = { CascadeType.PERSIST })
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "items_tags",
             schema = "public",
