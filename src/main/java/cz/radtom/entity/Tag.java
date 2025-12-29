@@ -1,10 +1,10 @@
 package cz.radtom.entity;
 
+import module java.base;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Set;
 
 @Entity
 @Table(name = "tags", schema = "public")
@@ -27,6 +27,15 @@ public class Tag {
         Tag tag = new Tag();
         tag.setValue(value);
         return tag;
+    }
+
+    public static Set<Tag> fromStringSet(Set<String> tags) {
+        if (tags == null) {
+            return Set.of();
+        }
+        else {
+            return tags.stream().map(Tag::of).collect(Collectors.toSet());
+        }
     }
 
 }

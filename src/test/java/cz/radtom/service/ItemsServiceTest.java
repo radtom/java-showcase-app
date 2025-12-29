@@ -3,6 +3,7 @@ package cz.radtom.service;
 import module java.base;
 
 import cz.radtom.dto.ItemDto;
+import cz.radtom.dto.SearchOperation;
 import cz.radtom.entity.Item;
 import cz.radtom.repository.ItemsRepository;
 import org.junit.jupiter.api.Test;
@@ -10,12 +11,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemsServiceTest {
@@ -32,18 +36,20 @@ public class ItemsServiceTest {
         Item item1 = new Item();
         Item item2 = new Item();
         List<Item> mockItems = Arrays.asList(item1, item2);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Item> mockPage = new PageImpl<>(mockItems, pageable, mockItems.size());
 
-        when(itemsRepository.findAll()).thenReturn(mockItems);
+        when(itemsRepository.findAll(pageable)).thenReturn(mockPage);
 
         // 2. Act: Call the service method
-        List<ItemDto> result = itemsService.getAllItems();
+        Page<ItemDto> result = itemsService.getAllItems(pageable);
 
         // 3. Assert: Verify the results
         assertNotNull(result, "The returned list should not be null");
-        assertEquals(2, result.size(), "The list size should match the mock data");
+        assertEquals(2, result.getTotalElements(), "The list size should match the mock data");
 
         // Verify that the repository method was actually called
-        verify(itemsRepository).findAll();
+        verify(itemsRepository).findAll(pageable);
     }
 
     @Test
@@ -103,6 +109,47 @@ public class ItemsServiceTest {
         // Assert
         assertNotNull(result);
         verify(itemsRepository).save(any(Item.class));
+    }
+
+    @Test
+    void searchItems_ReturnsPageOfDtos() {
+        // Arrange
+        Integer value = 100;
+        SearchOperation operation = SearchOperation.GT;
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Item mockItem = new Item();
+        mockItem.setValue(100);
+        Page<Item> itemPage = new PageImpl<>(List.of(mockItem));
+
+        // We mock the repository to return our page
+        // Note: any(Specification.class) is used because Specifications are hard to match exactly
+        when(itemsRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(itemPage);
+
+        // Act
+        Page<ItemDto> result = itemsService.searchItems(value, operation, null, pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals(100, result.getContent().getFirst().value());
+        verify(itemsRepository, times(1)).findAll(any(Specification.class), eq(pageable));
+    }
+
+    @Test
+    void searchItems_ReturnsEmptyPage() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        when(itemsRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(Page.empty());
+
+        // Act
+        Page<ItemDto> result = itemsService.searchItems(null, null, null, pageable);
+
+        // Assert
+        assertTrue(result.isEmpty());
+        verify(itemsRepository).findAll(any(Specification.class), eq(pageable));
     }
 
 }
