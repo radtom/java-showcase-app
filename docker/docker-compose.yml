@@ -48,7 +48,7 @@ services:
         condition: service_completed_successfully
 
   java-showcase-app:
-    image: java-showcase-app:latest
+    image: ghcr.io/radtom/java-showcase-app:latest
     container_name: java-showcase-app
     ports:
       - "8080:8080"
