@@ -20,6 +20,7 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <docker.image.name>java-showcase-app</docker.image.name>
     </properties>
 
     <dependencies>
@@ -106,7 +107,7 @@
                         </exclude>
                     </excludes>
                     <image>
-                        <name>java-showcase-app:latest</name>
+                        <name>${docker.image.name}</name>
                     </image>
                 </configuration>
             </plugin>
