@@ -154,4 +154,25 @@ class ItemsControllerTest {
                 .andExpect(jsonPath("$.content[0].tags[0]").value("tag1"));
     }
 
+    @Test
+    @DisplayName("Should validate data")
+    void testSearchItemsValidations() throws Exception {
+        mockMvc.perform(get("/item/search")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/item/search")
+                        .param("value", "10")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/item/search")
+                        .param("operation", "EQ")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isBadRequest());
+    }
+
 }

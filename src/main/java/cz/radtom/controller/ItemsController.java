@@ -3,10 +3,12 @@ package cz.radtom.controller;
 import module java.base;
 
 import cz.radtom.dto.*;
+import cz.radtom.exception.BadSearchRequestException;
 import cz.radtom.service.ItemsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -43,13 +45,13 @@ public class ItemsController {
 
     @PostMapping
     @Operation(summary = "Create a new item", description = "Creates a record and returns the new unique identifier.")
-    public Long createItem(@RequestBody CreateItemRequest request) {
+    public Long createItem(@Valid @RequestBody CreateItemRequest request) {
         return itemsService.createItem(request.value(), request.tags()).getId();
     }
 
     @PutMapping
     @Operation(summary = "Update an item", description = "Updates an existing item's value based on the provided ID.")
-    public Long updateItem(@RequestBody UpdateItemRequest request) {
+    public Long updateItem(@Valid @RequestBody UpdateItemRequest request) {
         return itemsService.updateItem(request.id(), request.value()).getId();
     }
 
@@ -61,6 +63,17 @@ public class ItemsController {
             @RequestParam(required = false) Set<String> tags,
             @ParameterObject Pageable pageable
     ) {
+        if (value != null && operation == null) {
+            throw new BadSearchRequestException("Operation missing for value");
+        }
+
+        if (value == null && operation != null) {
+            throw new BadSearchRequestException("Value missing for operation");
+        }
+
+        if (Stream.of(value, operation, tags).allMatch(Objects::isNull) || (tags != null && tags.isEmpty())) {
+            throw new BadSearchRequestException("Search criteria missing");
+        }
         return itemsService.searchItems(value, operation, tags, pageable);
     }
 
